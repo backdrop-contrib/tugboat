@@ -1,3 +1,5 @@
+NOTE: This repo was generated from the custom BackdropCMS.org [module](https://github.com/backdrop-ops/backdropcms.org/tree/master/www/modules/custom/borg_tugboat) using these wonderful instructions: [Moving Files from one Git Repository to Another, Preserving History](https://gbayer.com/development/moving-files-from-one-git-repository-to-another-preserving-history/).
+
 BackdropCMS.org Demo (Tugboat) Integration
 ==========================================
 
