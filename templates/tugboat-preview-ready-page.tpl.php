@@ -4,27 +4,27 @@
  */
 ?>
 
-<div class="borg-demo-done-page">
+<div class="demo-done-page">
 
-  <div class="borg-demo-done-center">
+  <div class="demo-done-center">
 
-    <p class="borg-demo-thank-you">
+    <p class="demo-thank-you">
       Thank you for creating a new demo sandbox. You can access your new Backdrop website at:
     </p>
 
-    <p class="borg-demo-url">
+    <p class="demo-url">
       <?php print l($url, $url); ?>
     </p>
-    <p class="borg-demo-button">
+    <p class="demo-button">
       <?php print l(t('Visit your site'), $url, array('attributes' => array('class' => array('button button-large')))); ?>
     </p>
 
-    <p class="borg-demo-persist-notice">
+    <p class="demo-persist-notice">
       This demo sandbox will persist for <strong><?php print $duration; ?></strong>.
     </p>
 
   </div>
-  <div class="borg-demo-done-left">
+  <div class="demo-done-left">
     <p>
       This demo sandbox will act as a new Backdrop installation would. You will
       need to run the installer and set an administrator account as part of the
@@ -43,10 +43,10 @@
       <?php print $duration; ?>.
     </p>
 
-    <figure class="borg-demo-tugboat-information">
+    <figure class="demo-tugboat-information">
       <a href="https://tugboat.qa">
       <?php print theme('image', array(
-        'path' => backdrop_get_path('module', 'borg_tugboat') . '/images/tugboat-logo.png',
+        'path' => backdrop_get_path('module', 'tugboat') . '/images/tugboat-logo.png',
         'alt' => 'Tugboat QA Logo',
         'width' => 800,
         'height' => 300,

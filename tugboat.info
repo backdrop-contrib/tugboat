@@ -1,0 +1,5 @@
+type = module
+name = Tugboat
+description = Integrates with Tugboat.qa to allow creating on-the-fly preview sites.
+backdrop = 1.x
+configure = admin/config/services/tugboat

@@ -1,0 +1,11 @@
+{
+  "_config_name": "tugboat.settings",
+  "access_token": "",
+  "repository_id": "",
+  "base_preview_id": "",
+  "command_line_tool": "/usr/local/bin/tugboat",
+  "page_url": "tugboat",
+  "create_page_title": "Create a Tugboat preview site",
+  "ready_page_title": "Your Tugboat preview site is ready!",
+  "preview_site_age": "86400"
+}
