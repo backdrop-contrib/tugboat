@@ -15,47 +15,29 @@ function tugboat_admin_settings($form, &$form_state) {
     '#type' => 'fieldset',
     '#title' => t('Tugboat.qa details'),
   );
-  $token = settings_get('tugboat_access_token');
-  if (!empty($token)) {
-    $form['tugboat.qa']['access_token'] = array(
-      '#type' => 'item',
-      '#title' => t('Access token'),
-      '#description' => t("An <a href=\"@url\">access token</a> generated from Tugboat.qa. This has already been set in 'settings.php'.", array('@url' => 'https://dashboard.tugboat.qa/access-tokens')),
-      '#markup' => substr($token, 0, 4) . str_repeat('*', strlen($token) - 8) . substr($token, -4),
-    );
-  }
-  else {
-    $form['tugboat.qa']['access_token'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Access token'),
-      '#description' => t("An <a href=\"@url\">access token</a> generated from Tugboat.qa. It can alternatively be set in 'settings.php' via <code>\$settings['tugboat_access_token']</code>.", array('@url' => 'https://dashboard.tugboat.qa/access-tokens')),
-      '#default_value' => $config->get('access_token'),
-      '#size' => 40,
-    );
-  }
-  $form['tugboat.qa']['repository_id'] = array(
+  $form['tugboat.qa']['access_token'] = array(
     '#type' => 'textfield',
-    '#title' => t('Repository ID'),
-    '#description' => t("The ID of your Tugboat repository. This 24-character, alphanumeric hash can be found in the URL when viewing the repository page in the Tugboat.qa dashboard (e.g. <code>5e177759fa8a5e0f9ae64d14</code>)."),
-    '#default_value' => $config->get('repository_id'),
-    '#size' => 30,
+    '#title' => t('Access token'),
+    '#description' => t("An <a href=\"@url\">access token</a> generated from Tugboat.qa. It can alternatively be set in the 'settings' file via <code>\$settings['tugboat_access_token']</code>.", array('@url' => 'https://dashboard.tugboat.qa/access-tokens')),
+    '#default_value' => $config->get('access_token'),
+    '#size' => 40,
   );
-  $form['tugboat.qa']['base_preview_id'] = array(
+  // Make field disabled if token already set in 'settings' file.
+  if (!empty($token = settings_get('tugboat_access_token'))) {
+    $form['tugboat.qa']['access_token']['#value'] = substr($token, 0, 4) . str_repeat('*', strlen($token) - 8) . substr($token, -4);
+    $form['tugboat.qa']['access_token']['#description'] = t("An <a href=\"@url\">access token</a> generated from Tugboat.qa. This has already been set in the 'settings' file.", array('@url' => 'https://dashboard.tugboat.qa/access-tokens'));
+    $form['tugboat.qa']['access_token']['#disabled'] = TRUE;
+  }
+  $form['tugboat.qa']['preview_id'] = array(
     '#type' => 'textfield',
-    '#title' => t('Base preview ID'),
-    '#description' => t("The ID of the Tugboat base preview to use for cloning new previews. This 24-character, alphanumeric hash can be found in the URL when viewing the preview page in the Tugboat.qa dashboard (e.g. <code>5e177775fa8a5e61a7e64d53</code>)."),
-    '#default_value' => $config->get('base_preview_id'),
+    '#title' => t('Preview ID'),
+    '#description' => t("The ID of the Tugboat preview to use for cloning new previews from. This 24-character, alphanumeric hash can be found in the URL when viewing the preview page in the Tugboat.qa dashboard (e.g. <code>5e177775fa8a5e61a7e64d53</code>)."),
+    '#default_value' => $config->get('preview_id'),
     '#size' => 30,
   );
   $form['this_site'] = array(
     '#type' => 'fieldset',
     '#title' => t('Settings for this site'),
-  );
-  $form['this_site']['command_line_tool'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Path to the command line tool'),
-    '#description' => t("The path to the Tugboat.qa <a href=\"@url\">command line tool</a> on the server. Can be an absolute path, or relative to the Backdrop installation.", array('@url' => 'https://dashboard.tugboat.qa/downloads')),
-    '#default_value' => $config->get('command_line_tool'),
   );
   $form['this_site']['page_url'] = array(
     '#type' => 'textfield',
@@ -104,42 +86,21 @@ function tugboat_admin_settings($form, &$form_state) {
  * Validate handler for tugboat_admin_settings().
  */
 function tugboat_admin_settings_validate($form, &$form_state) {
-  $token = !empty($form_state['values']['access_token']) ? $form_state['values']['access_token'] : NULL;
-  $path = $form_state['values']['command_line_tool'];
+  require_once backdrop_get_path('module', 'tugboat') . '/unirest-php/src/Unirest.php';
 
-  // Validate the path to the command line tool.
-  $error = '';
-  $valid = _tugboat_validate_path($path, $error);
-  if (!$valid) {
-    form_set_error('command_line_tool', $error);
-    return;
-  }
+  $values = $form_state['values'];
 
-  // Validate the Repository ID.
-  $return = array();
-  $error = '';
-  $success = _tugboat_execute('find ' . $form_state['values']['repository_id'], $return, $error, $token, $path);
-  if (!$success) {
-    if ($error) {
-      form_set_error('repository_id', t('The provided repository ID was not found. Error from Tugboat: @error', array('@error' => check_plain($error))));
-    }
-    else {
-      form_set_error('repository_id', t('Tugboat returned a response that was not understood.'));
-    }
-    return;
+  // Validate the access token.
+  $token = $values['access_token'];
+  if (settings_get('tugboat_access_token')) {
+    $token = settings_get('tugboat_access_token');
+    $form_state['values']['access_token'] = '';
   }
+  // We try getting a list of projects just to test if the access token works.
+  $project_response = Unirest\Request::get(TUGBOAT_API_URL . 'projects', tugboat_api_headers($token));
+  tugboat_api_get_response($project_response, 'form', 'access_token');
 
-  // Validate the Base Preview ID.
-  $return = array();
-  $error = '';
-  $success = _tugboat_execute('find ' . $form_state['values']['base_preview_id'], $return, $error, $token, $path);
-  if (!$success) {
-    if ($error) {
-      form_set_error('base_preview_id', t('The provided base preview ID was not found. Error from Tugboat: @error', array('@error' => '<code>' . check_plain($error) . '</code>')));
-    }
-    else {
-      form_set_error('base_preview_id', t('Tugboat returned a response that was not understood.'));
-    }
-    return;
-  }
+  // Validate the preview ID.
+  $preview_response = Unirest\Request::get(TUGBOAT_API_URL . 'previews/' . $values['preview_id'], tugboat_api_headers($token));
+  tugboat_api_get_response($preview_response, 'form', 'preview_id');
 }

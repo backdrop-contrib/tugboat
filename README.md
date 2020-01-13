@@ -1,65 +1,57 @@
-NOTE: This repo was generated from the custom BackdropCMS.org [module](https://github.com/backdrop-ops/backdropcms.org/tree/master/www/modules/custom/borg_tugboat) using these wonderful instructions: [Moving Files from one Git Repository to Another, Preserving History](https://gbayer.com/development/moving-files-from-one-git-repository-to-another-preserving-history/).
+Tugboat
+=======
 
-BackdropCMS.org Demo (Tugboat) Integration
-==========================================
+[Tugboat.qa](https://tugboat.qa/) is a service that allows for the deployment of
+preview websites, generally for testing and quality assurance during
+development. This module provides integration with Tugboat to allow creating
+on-the-fly sites with the push of a button.
 
-This module provides demo capabilities using the tugboat.qa service. Tugboat
-provides up to 40GB (currently) of sandbox space to host Backdrop CMS demo
-sites. This service is provided by [Lullabot](https://www.lullabot.com) free
-of charge. Smaller service plans are free for all users while larger accounts
-may be acquired for Open Source projects like Backdrop CMS. We are limited by
-available disk space, not the number of previews. With current configurations
-we use about 1.5GB of space per "base preview" (version of Backdrop we support),
-plus whatever disk space is used by individual installs of Backdrop (such as
-their database size and uploaded files).
+This module was originally built as a custom module for BackdropCMS.org where it
+is still used to allow people to demo a Backdrop site quickly and easily. This
+version has been re-written to use Tugboat's new API and to be more generic
+(removing some of the Backdrop-specific wording, etc.)
 
-## Site Configuration
+To use this module, you'll need a Tugboat.qa account and a Git repository that
+will be used to create the preview sites. See the
+[Tugboat documentation](https://docs.tugboat.qa/setting-up-tugboat/) for more
+details.
 
-Using this module requires setting an access token in settings.php:
+Installation
+------------
 
-```
-$settings['borg_tugboat_token'] = '12345678901234567890123456789012';
-```
+- Install this module using the official Backdrop CMS instructions at
+  https://backdropcms.org/guide/modules.
 
-An access token can be generate at https://dashboard2.tugboat.qa/access-tokens
+- Visit the configuration page under Administration > Configuration > Web
+  Services > Tugboat (`admin/config/services/tugboat`) and enter the required
+  information.
 
-The BackdropCMS.org Demos account dashboard is accessible at
-https://dashboard2.tugboat.qa/5bdb5c268eabd5000137a86d
+- Test your setup at the 'Create' page URL you provided (e.g. `/tugboat`).
 
-Request access from info@backdropcms.org to be added to the project and generate
-a token for your own personal localhost setups.
+- Optionally override the module's template files in your theme to customise the
+  'Create' and 'Ready' page designs/wording.
 
-## Using Tugboat Commands
+Issues
+------
 
-Tugboat commands are executed through the tugboat binary in /bin/tugboat. For
-example to list all current sandboxes use:
+Bugs and Feature requests should be reported in the Issue Queue:
+https://github.com/backdrop-contrib/tugboat/issues.
 
-```
-./tugboat -t ela2etnr1kgap1lxb05kslhooeorcxdc ls previews repo=5bdb5c268eabd5000137a87b --json
-```
+Current Maintainers
+-------------------
 
-Piping the results into the `jq` command line tool is also very useful for
-pretty-printing and filtering the results:
+- [Peter Anderson](https://github.com/BWPanda)
 
-```
-./tugboat -t ela2etnr1kgap1lxb05kslhooeorcxdc ls previews repo=5bdb5c268eabd5000137a87b --json | jq
-```
+Credits
+-------
 
-For more information about the Tugboat CLI tool, see the documentation at:
-https://docs.tugboat.qa/advanced/cli/
+- Originally written for BackdropCMS.org by [Nate Lampton](https://github.com/quicksketch).
+- Moved to its own contrib repo using
+  [instructions](https://gbayer.com/development/moving-files-from-one-git-repository-to-another-preserving-history/)
+  by Greg Bayer.
 
-## Executing Tugboat Commands in PHP
+License
+-------
 
-To execute a command in PHP code, use the provided `_borg_tugboat_execute()`
-function such as this:
-
-```
-$return_data = array();
-$error_string = '';
-$success = _borg_tugboat_execute("ls previews repo=$repo", $return_data, $error_string);
-```
-
-The returning result data will populated into the `$return_data` array passed by
-reference. If `$success` is `FALSE`, any error from Tugboat will be populated
-into the `$error_string` value.
-
+This project is GPL v2 software.
+See the LICENSE.txt file in this directory for complete text.

@@ -1,0 +1,8 @@
+/**
+ * Styling for the 'Create' and 'Ready' pages.
+ */
+
+.tugboat-create-page,
+.tugboat-ready-page {
+  text-align: center;
+}

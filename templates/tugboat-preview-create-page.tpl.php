@@ -1,13 +1,14 @@
 <?php
 /**
- * Template file for the create demo page.
+ * Template file for the Create page.
+ *
+ * Available variables:
+ * - $form: The form array for the 'Create' button.
  */
+dpm($form);
 ?>
 
-<div class="demo-create-page">
-  <h2>See what it's like to use Backdrop CMS.</h2>
-  <p class="demo-create-intro">Use your own, free, demonstration website to take Backdrop CMS for a spin.</p>
-
+<div class="tugboat-create-page">
   <?php print render($form); ?>
-  <p>Creating a new sandbox may take a moment.</p>
+  <p>Creating a new preview site may take a moment.</p>
 </div>
