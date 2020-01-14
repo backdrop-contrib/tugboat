@@ -5,7 +5,6 @@
  * Available variables:
  * - $form: The form array for the 'Create' button.
  */
-dpm($form);
 ?>
 
 <div class="tugboat-create-page">

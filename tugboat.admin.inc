@@ -9,7 +9,6 @@
  */
 function tugboat_admin_settings($form, &$form_state) {
   $config = config('tugboat.settings');
-  $form['#config'] = 'tugboat.settings';
 
   $form['tugboat.qa'] = array(
     '#type' => 'fieldset',
@@ -78,8 +77,14 @@ function tugboat_admin_settings($form, &$form_state) {
     ), 'format_interval'),
   );
 
-  $form['#validate'] = array('tugboat_admin_settings_validate');
-  return system_settings_form($form);
+  $form['actions'] = array(
+    '#type' => 'actions',
+    'submit' => array(
+      '#type' => 'submit',
+      '#value' => t('Save configuration'),
+    ),
+  );
+  return $form;
 }
 
 /**
@@ -103,4 +108,24 @@ function tugboat_admin_settings_validate($form, &$form_state) {
   // Validate the preview ID.
   $preview_response = Unirest\Request::get(TUGBOAT_API_URL . 'previews/' . $values['preview_id'], tugboat_api_headers($token));
   tugboat_api_get_response($preview_response, 'form', 'preview_id');
+}
+
+/**
+ * Submit handler for tugboat_admin_settings().
+ */
+function tugboat_admin_settings_submit($form, &$form_state) {
+  form_state_values_clean($form_state);
+
+  // Save values to config.
+  $configs = _system_sort_form_values_by_config($form, $form_state, 'tugboat.settings');
+  foreach ($configs as $bucket => $data) {
+    config_set_multiple($bucket, $data);
+  }
+
+  // Rebuild the menu so that the 'Create' and 'Ready' pages are available
+  // straight away.
+  menu_rebuild();
+
+  backdrop_set_message(t('The configuration options have been saved.'));
+  backdrop_set_message(t('Create preview sites here: <a href="/@url">/@url</a>.', array('@url' => $form_state['values']['page_url'])));
 }
