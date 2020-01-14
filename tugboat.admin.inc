@@ -51,6 +51,12 @@ function tugboat_admin_settings($form, &$form_state) {
     '#description' => t("The title of the 'Create' page for this site (where people go to create Tugboat preview sites)."),
     '#default_value' => $config->get('create_page_title'),
   );
+  $form['this_site']['create_page_button'] = array(
+    '#type' => 'textfield',
+    '#title' => t("'Create' page button text"),
+    '#description' => t("The button text on the 'Create' page."),
+    '#default_value' => $config->get('create_page_button'),
+  );
   $form['this_site']['ready_page_title'] = array(
     '#type' => 'textfield',
     '#title' => t("'Ready' page title"),

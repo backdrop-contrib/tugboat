@@ -25,12 +25,12 @@ function tugboat_preview_create_form($form, &$form_state) {
   return array(
     'create_preview_site' => array(
       '#type' => 'submit',
-      '#value' => t('Create preview site'),
+      '#value' => check_plain(config_get('tugboat.settings', 'create_page_button')),
       '#submit' => array('tugboat_preview_create_form_submit'),
       '#ajax' => array(
         'progress' => array(
           'type' => 'throbber',
-          'message' => t('Creating preview site...'),
+          'message' => t('Please wait...'),
         ),
         'callback' => 'tugboat_preview_create_form_ajax',
       ),
@@ -61,7 +61,7 @@ function tugboat_preview_create_form_submit($form, &$form_state) {
       $config->save();
 
       // Redirect to the 'Preview ready' page.
-      backdrop_set_message(t('New preview site created successfully!'));
+      backdrop_set_message(t('New site created successfully!'));
       $form_state['redirect'] = $config->get('page_url') . '/' . $new_preview->id;
     }
   }
