@@ -52,9 +52,14 @@ function tugboat_preview_create_form_submit($form, &$form_state) {
   $cloned = tugboat_api_get_response($clone_response, 'form', 'create_preview_site');
 
   if ($cloned) {
-    $preview_response = Unirest\Request::get(TUGBOAT_API_URL . 'previews/' . $cloned->preview, tugboat_api_headers());
-    $new_preview = tugboat_api_get_response($preview_response, 'form', 'create_preview_site');
+    // Check the job every few seconds until it's done and the preview's ready.
+    do {
+      sleep(3);
+      $job_response = Unirest\Request::get(TUGBOAT_API_URL . 'jobs/' . $cloned->job, tugboat_api_headers());
+    }
+    while (isset($job_response->headers['Retry-After']));
 
+    $new_preview = tugboat_api_get_response($job_response, 'form', 'create_preview_site');
     if ($new_preview) {
       // Add the new preview to config.
       $config->set('previews.' . $new_preview->id, $new_preview->url);

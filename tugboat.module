@@ -184,7 +184,7 @@ function tugboat_api_get_response($response, $type = 'message', $form_item = NUL
   // Get the type of return code by the first number.
   $code_type = substr($response->code, 0, 1);
 
-  if ($code_type != '2') {
+  if ($code_type != '2' && $code_type != '3') {
     $error = 'Tugboat error #' . check_plain($response->body->code) . ': ' . check_plain($response->body->message);
 
     switch ($type) {
