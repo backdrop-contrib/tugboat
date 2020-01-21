@@ -52,12 +52,17 @@ function tugboat_preview_create_form_submit($form, &$form_state) {
   $cloned = tugboat_api_get_response($clone_response, 'form', 'create_preview_site');
 
   if ($cloned) {
-    // Check the job every few seconds until it's done and the preview's ready.
-    do {
-      sleep(3);
-      $job_response = Unirest\Request::get(TUGBOAT_API_URL . 'jobs/' . $cloned->job, tugboat_api_headers());
+    // Keep checking the job until it's complete and the preview's ready.
+    $job_response = Unirest\Request::get(TUGBOAT_API_URL . 'jobs/' . $cloned->job, tugboat_api_headers());
+    if ($job_response->code == 200) {
+      timer_start('tugboat-job--' . $cloned->job);
+      do {
+        sleep($job_response->headers['Retry-After']);
+        $job_response = Unirest\Request::get(TUGBOAT_API_URL . 'jobs/' . $cloned->job, tugboat_api_headers());
+      }
+      while ($job_response->code == 200 && timer_read('tugboat-job--' . $cloned->job) < 20000);
+      timer_stop('tugboat-job--' . $cloned->job);
     }
-    while (isset($job_response->headers['Retry-After']));
 
     $new_preview = tugboat_api_get_response($job_response, 'form', 'create_preview_site');
     if ($new_preview) {
