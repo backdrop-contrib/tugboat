@@ -98,7 +98,7 @@ function tugboat_cron() {
   $age = $config->get('preview_site_age');
 
   // Run at an interval that matches the preview site age.
-  if (REQUEST_TIME - state_get('tugboat_cron', 0) > $age) {
+  if ((REQUEST_TIME - state_get('tugboat_cron', 0)) > $age) {
     state_set('tugboat_cron', REQUEST_TIME);
 
     $headers = tugboat_api_headers();
@@ -114,15 +114,21 @@ function tugboat_cron() {
 
       // Delete if not a base preview (anchor) and it's older than the specified
       // age.
-      if ($preview && !$preview->anchor && strtotime($preview->createdAt) < $delete_timestamp) {
-        $delete_response = Unirest\Request::delete(TUGBOAT_API_URL . 'previews/' . $preview_id, $headers);
-        $deleted = tugboat_api_get_response($delete_response, 'watchdog');
+      if ($preview) {
+        if (!$preview->anchor && strtotime($preview->createdAt) < $delete_timestamp) {
+          $delete_response = Unirest\Request::delete(TUGBOAT_API_URL . 'previews/' . $preview_id, $headers);
+          $deleted = tugboat_api_get_response($delete_response, 'watchdog');
 
-        // Keep track of how many previews were deleted and update config.
-        if ($deleted) {
-          $delete_count++;
-          $config->clear('previews.' . $preview_id);
+          // Keep track of how many previews were deleted and update config.
+          if ($deleted) {
+            $delete_count++;
+            $config->clear('previews.' . $preview_id);
+          }
         }
+      }
+      elseif ($preview_response->code == 404) {
+        // Preview doesn't exist in Tugboat, so remove from config.
+        $config->clear('previews.' . $preview_id);
       }
     }
 
@@ -201,6 +207,6 @@ function tugboat_api_get_response($response, $type = 'message', $form_item = NUL
     return FALSE;
   }
   else {
-    return $response->body;
+    return !empty($response->body) ? $response->body : TRUE;
   }
 }
