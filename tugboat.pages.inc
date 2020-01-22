@@ -43,6 +43,8 @@ function tugboat_preview_create_form($form, &$form_state) {
  */
 function tugboat_preview_create_form_submit($form, &$form_state) {
   require_once backdrop_get_path('module', 'tugboat') . '/unirest-php/src/Unirest.php';
+  // Prevent issues with duplicate response headers by disabling FOLLOWLOCATION.
+  Unirest\Request::curlOpt(CURLOPT_FOLLOWLOCATION, FALSE);
 
   $config = config('tugboat.settings');
   $preview_id = $config->get('preview_id');
@@ -55,24 +57,26 @@ function tugboat_preview_create_form_submit($form, &$form_state) {
     // Keep checking the job until it's complete and the preview's ready.
     $job_response = Unirest\Request::get(TUGBOAT_API_URL . 'jobs/' . $cloned->job, tugboat_api_headers());
     if ($job_response->code == 200) {
-      timer_start('tugboat-job--' . $cloned->job);
       do {
         sleep($job_response->headers['Retry-After']);
         $job_response = Unirest\Request::get(TUGBOAT_API_URL . 'jobs/' . $cloned->job, tugboat_api_headers());
       }
-      while ($job_response->code == 200 && timer_read('tugboat-job--' . $cloned->job) < 20000);
-      timer_stop('tugboat-job--' . $cloned->job);
+      while ($job_response->code == 200);
     }
 
-    $new_preview = tugboat_api_get_response($job_response, 'form', 'create_preview_site');
-    if ($new_preview) {
+    $job = tugboat_api_get_response($job_response, 'form', 'create_preview_site');
+    if ($job) {
+      // Get new preview.
+      $preview_response = Unirest\Request::get(TUGBOAT_API_URL . 'previews/' . $job->preview, tugboat_api_headers());
+      $preview = tugboat_api_get_response($preview_response, 'form', 'create_preview_site');
+
       // Add the new preview to config.
-      $config->set('previews.' . $new_preview->id, $new_preview->url);
+      $config->set('previews.' . $preview->id, $preview->url);
       $config->save();
 
       // Redirect to the 'Preview ready' page.
       backdrop_set_message(t('New site created successfully!'));
-      $form_state['redirect'] = $config->get('page_url') . '/' . $new_preview->id;
+      $form_state['redirect'] = $config->get('page_url') . '/' . $preview->id;
     }
   }
 }
