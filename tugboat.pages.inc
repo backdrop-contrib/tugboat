@@ -54,7 +54,7 @@ function tugboat_preview_create_form_submit($form, &$form_state) {
     $built = tugboat_api_curl('/previews', array('method' => 'post', 'body' => array('ref' => $git_ref, 'repo' => $repository_id)));
   }
   elseif ($build_method == 'clone') {
-    $built = tugboat_api_curl('/previews/' . $preview_id . '/clone');
+    $built = tugboat_api_curl('/previews/' . $preview_id . '/clone', array('method' => 'post'));
   }
 
   if ($built['code'] >= 400) {
