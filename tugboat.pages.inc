@@ -107,7 +107,7 @@ function tugboat_preview_create_form_ajax($form, $form_state) {
   $commands = array();
 
   if (isset($form_state['redirect'])) {
-    $commands[] = ajax_command_redirect($form_state['redirect']);
+    $commands[] = ajax_command_redirect(url($form_state['redirect']));
   }
   else {
     // Allow messages to be displayed immediately.
