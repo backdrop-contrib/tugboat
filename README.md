@@ -41,6 +41,7 @@ Current Maintainers
 -------------------
 
 - [Peter Anderson](https://github.com/BWPanda)
+- [Nate Lampton](https://github.com/quicksketch)
 
 Credits
 -------
